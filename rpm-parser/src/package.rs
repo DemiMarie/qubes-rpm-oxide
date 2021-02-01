@@ -16,6 +16,25 @@ pub struct RPMPackage {
     pub immutable: ImmutableHeader,
 }
 
+/// Package reading security level.  Each level includes all of the checks of
+/// the previous ones.
+#[derive(Copy, Clone, Ord, PartialOrd, PartialEq, Eq)]
+pub enum SecurityLevel {
+    /// Allow any package that is syntactically correct.  This is enough to
+    /// ensure that `rpmkeys --define '_pkgverify_level all' --checksig -- "$PKG"`
+    /// will catch a malicious package, as it still is enough to protect
+    /// `rpmkeys` from exploit attempts.
+    InsecureAllowAny,
+    /// Require that the package has a header signature and a payload hash, and
+    /// that the payload hash is correct.  This is enough to ensure that DNF’s
+    /// signature verification will catch a malicious package.
+    InsecureRequireHeaderSignatureAndPayloadHashButDoNotCheckSignatures,
+    /// Require that the package is validly signed.  This is equivalent to
+    /// `rpmkeys --define '_pkgverify_level all' --checksig -- "$PKG"`, but
+    /// with a much lower likelyhood of vulnerabilities.
+    SecureCheckSignatures,
+}
+
 impl RPMPackage {
     /// Load a package from `r`
     pub fn read(r: &mut dyn Read) -> Result<Self> {
