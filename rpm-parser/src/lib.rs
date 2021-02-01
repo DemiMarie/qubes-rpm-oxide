@@ -48,3 +48,4 @@ pub use header::Header as RPMHeader;
 pub use header::{load_immutable, load_signature};
 pub use lead::{read_lead, RPMLead};
 pub use package::RPMPackage;
+pub use ffi::DigestCtx;
